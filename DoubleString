@@ -1,0 +1,3 @@
+interface DoubleString extends Remote {
+    String doubleString(String str) throws RemoteException;
+}
