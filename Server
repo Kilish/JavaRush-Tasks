@@ -1,0 +1,43 @@
+public  class Person {
+	
+	public static final String UNIC_BINDING_NAME = "double.string";
+    public static Registry registry;
+
+    //pretend we start rmi client as CLIENT_THREAD thread
+    public static Thread CLIENT_THREAD = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            //напишите тут ваш код
+        	try {
+        			Registry r = LocateRegistry.getRegistry(null,1997);
+        			DoubleString doubleString = (DoubleString) r.lookup(UNIC_BINDING_NAME);
+        			String s = doubleString.doubleString("JAVA");
+        			System.out.println(s);
+
+			} catch (NotBoundException e) {
+				e.printStackTrace();
+			} catch (RemoteException e) {
+				e.printStackTrace();
+			}
+        }
+    });
+
+    public static void main(String[] args) {
+        //pretend we start rmi server as main thread
+        Remote stub = null;
+        try {
+            registry = LocateRegistry.createRegistry(1997);
+            final DoubleStringImpl service = new DoubleStringImpl();
+
+            stub = UnicastRemoteObject.exportObject(service, 0);
+            registry.bind(UNIC_BINDING_NAME, stub);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        } catch (AlreadyBoundException e) {
+            e.printStackTrace();
+        }
+
+        //start client
+        CLIENT_THREAD.start();
+    }
+}
